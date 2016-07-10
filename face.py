@@ -1,10 +1,17 @@
 import http.client, urllib.request, urllib.parse, urllib.error, base64
 import sys, json
 
+# Parse command line parameters
 if (len(sys.argv) < 2):
-    print ("Pass paths to two images as cmd parameters");
+    print ("Usage:\n");
+    print ("Pass two images as parameters. \n");
+    print ("Example: python face.py 1.jpg 2.jpg");
+
     sys.exit(-1);
 
+
+# call microsoft api to get face-ids for the images.
+# fileObject param is the file object obtained after opening file.
 
 def detect_faces (fileObject):
 
@@ -25,17 +32,26 @@ def detect_faces (fileObject):
 
     try:
         conn = http.client.HTTPSConnection('api.projectoxford.ai')
+
+        # send request to microsoft.
         conn.request("POST", "/face/v1.0/detect?%s" % params, fileOb, headers)
         response = conn.getresponse()
+
+        # read the respose obtained.
         data = response.read()
+
+        # decode response.
         decoded_data = data.decode ("UTF-8");
         conn.close();
 
     except Exception as e:
         print("[Errno {0}] {1}".format(e.errno, e.strerror));
-
+    
+    # import received response to Json object for easy retreival.
     return json.loads(decoded_data);
 
+
+# Pass Json object having face-ids of two faces for matching.
 def face_matches (jsonObj):
     headers = {
         # Request headers
@@ -59,6 +75,7 @@ def face_matches (jsonObj):
 image1 = detect_faces (sys.argv[1]);
 image2 = detect_faces (sys.argv[2]);
 
+# Parse faceIds from Json Objects.
 faceId1 = image1[0]['faceId'];
 faceId2 = image2[0]['faceId'];
 
@@ -69,6 +86,8 @@ jsonObj = json.loads(str1);
 res = face_matches (str(jsonObj));
 print ("Image matched : %s" % res['isIdentical']);
 
+
+# print additional information, like age,gender, etc.
 age1= image1[0]['faceAttributes']['age'];
 age2= image2[0]['faceAttributes']['age'];
 age = (age1 + age2) / 2;
