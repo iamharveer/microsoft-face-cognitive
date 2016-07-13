@@ -4,7 +4,9 @@
 #include <stdio.h>
 
 using namespace cv;
-//
+
+int importPythonModule (const char *);
+
 // A Simple Camera Capture Framework
 int main() 
 {
@@ -41,9 +43,11 @@ int main()
            // IplImage* img= cvCreateImage(size, IPL_DEPTH_16S, 1);
            // img = frame;
 
-            cvSaveImage("matteo.jpg", frame);
+            cvSaveImage("1.jpg", frame);
+            frame->imageData[frame->imageSize - 1] = '\0';
 
-        }
+            importPythonModule ("1.jpg");
+         }
 
         if ( (cvWaitKey(10) & 255) == 27 ) break;
     }

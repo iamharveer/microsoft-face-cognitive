@@ -16,6 +16,10 @@ if (len(sys.argv) < 2):
 def detect_faces (fileObject):
 
     fileOb = open (fileObject, "rb");
+    str1 = fileOb.read();
+    print (type(str1));
+
+    return 1;
 
     headers = {
         # Request headers
