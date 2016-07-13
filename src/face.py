@@ -79,7 +79,7 @@ def get_images_from_cpp (img1_file):
     jsonObj = json.loads(str1);
 
     res = face_matches (str(jsonObj));
-    
     print (res);
+
     return int(res['isIdentical']);
 

@@ -1,5 +1,6 @@
 // system defined header files.
 #include <queue>
+#include <thread>
 #include <iostream>
 
 // user or external lib dependent header files.
@@ -7,15 +8,22 @@
 #include "opencv/cv.h"
 #include "opencv2/opencv.hpp"
 
+// include namespaces.
 using namespace cv;
 using namespace std;
 
+// global variables.
+queue<IplImage> que;
 
-/********************************************************************/
-/* Function Name  : captureFrame                                    */
-/* Description    :                                                 */
-/* Restrictions   :                                                 */
-/********************************************************************/
+
+/******************************************************************************/
+/* Function Name  : captureFrame                                              */
+/* Description    : captures a frame from primary camera (webcam).            */
+/* Parameters     : - CvCapture* const                                        */
+/*                  - IplImage** const                                        */
+/* Restrictions   :                                                           */
+/* Dependencies   :                                                           */
+/******************************************************************************/
 int captureFrame (CvCapture* const capture, IplImage** const frame)
 {
    // Get one frame
@@ -33,13 +41,21 @@ int captureFrame (CvCapture* const capture, IplImage** const frame)
 }
 
 
-/********************************************************************/
-/* Function Name  : main                                            */
-/* Description    :                                                 */
-/* Restrictions   :                                                 */
-/********************************************************************/
-int main() 
+/******************************************************************************/
+/* Function Name  : main                                                      */
+/* Description    : main function.                                            */
+/* Parameters     : - argc : number of arguments passed to the program.       */
+/*                  - argv : pointers to paramters passed.                     */
+/* Restrictions   :                                                           */
+/* Dependencies   :                                                           */
+/******************************************************************************/
+int main(int argc, char *argv[]) 
 {
+   int pushedFrameCount = 0;
+
+   // Get one frame
+   IplImage* frame;
+
    CvCapture* capture = cvCaptureFromCAM( CV_CAP_ANY );
  
    if ( !capture )
@@ -52,9 +68,9 @@ int main()
 
    // Create a window in which the captured images will be presented
    cvNamedWindow( "mywindow", CV_WINDOW_AUTOSIZE );
-
-   // Get one frame
-   IplImage* frame;;
+   
+   int n = 10;
+   thread processFrameThID (processFrame, n);
 
    // Show the image captured from the camera in the window and repeat
    while ( 1 )
@@ -74,17 +90,14 @@ int main()
       }
 
       cvShowImage( "mywindow", frame );
-
-      // Do not release the frame!
-      if ( (cvWaitKey(10) & 255) == 's' )
+      
+      // push frame to queue until the count < 10.
+      if (pushedFrameCount++ < MAX_FRAMES_TO_PROCESS)
       {
-         cvSaveImage("1.jpg", frame);
-         frame->imageData[frame->imageSize - 1] = '\0';
-
-         importPythonModule ("1.jpg");
+         que.push (*frame);
       }
 
-      if ( (cvWaitKey(10) & 255) == 27 ) break;
+      cvWaitKey(28);
    }
 
    // Release the capture device housekeeping

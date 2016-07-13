@@ -89,7 +89,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_face_OBJECTS = face.$(OBJEXT) python_cpp_interface.$(OBJEXT)
+am_face_OBJECTS = face.$(OBJEXT) python_cpp_interface.$(OBJEXT) \
+	frame.$(OBJEXT)
 face_OBJECTS = $(am_face_OBJECTS)
 face_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -242,7 +243,7 @@ top_srcdir = @top_srcdir@
 PYTHONLIBS = -ldl  -lutil -lm  -lpython3.4m -Xlinker -export-dynamic
 OPENCVLIBS = -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_videoio
 AM_CXXFLAGS = -g -std=c++11 -I../include/ -L/usr/local/lib -lpthread $(PYTHONLIBS) $(OPENCVLIBS)
-face_SOURCES = face.cpp python_cpp_interface.cpp
+face_SOURCES = face.cpp python_cpp_interface.cpp frame.cpp
 all: all-am
 
 .SUFFIXES:
@@ -331,6 +332,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/face.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/frame.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/python_cpp_interface.Po@am__quote@
 
 .cpp.o:
@@ -555,7 +557,7 @@ uninstall-am: uninstall-binPROGRAMS
 
 
 clean_local :
-	rm face.o python_cpp_interface.o
+	rm face.o python_cpp_interface.o frame.o
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
