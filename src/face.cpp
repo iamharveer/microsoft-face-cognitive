@@ -1,58 +1,95 @@
+// system defined header files.
+#include <queue>
+#include <iostream>
+
+// user or external lib dependent header files.
+#include "face.hpp"
 #include "opencv/cv.h"
 #include "opencv2/opencv.hpp"
 
-#include <stdio.h>
-
 using namespace cv;
+using namespace std;
 
-int importPythonModule (const char *);
 
-// A Simple Camera Capture Framework
+/********************************************************************/
+/* Function Name  : captureFrame                                    */
+/* Description    :                                                 */
+/* Restrictions   :                                                 */
+/********************************************************************/
+int captureFrame (CvCapture* const capture, IplImage** const frame)
+{
+   // Get one frame
+   *frame = cvQueryFrame (capture);
+
+   if (*frame == NULL)
+   {
+      fprintf( stderr, "ERROR: frame is null...\n" );
+
+      // needs to be replaced with proper error handling.
+      return -1;
+   }
+  
+   return 0;
+}
+
+
+/********************************************************************/
+/* Function Name  : main                                            */
+/* Description    :                                                 */
+/* Restrictions   :                                                 */
+/********************************************************************/
 int main() 
 {
-    CvCapture* capture = cvCaptureFromCAM( CV_CAP_ANY );
+   CvCapture* capture = cvCaptureFromCAM( CV_CAP_ANY );
  
-    if ( !capture )
-    {
-        fprintf( stderr, "ERROR: capture is NULL \n" );
-        getchar();
-        return -1;
-    }
+   if ( !capture )
+   {
+      fprintf( stderr, "ERROR: capture is NULL \n" );
+      getchar();
+        
+      return -1;
+   }
 
-    // Create a window in which the captured images will be presented
-    cvNamedWindow( "mywindow", CV_WINDOW_AUTOSIZE );
-    // Show the image captured from the camera in the window and repeat
-    while ( 1 )
-    {
-        // Get one frame
-        IplImage* frame = cvQueryFrame( capture );
-        if ( !frame )
-        {
-            fprintf( stderr, "ERROR: frame is null...\n" );
-            getchar();
-            break;
-        }
+   // Create a window in which the captured images will be presented
+   cvNamedWindow( "mywindow", CV_WINDOW_AUTOSIZE );
 
-        cvShowImage( "mywindow", frame );
-        // Do not release the frame!
+   // Get one frame
+   IplImage* frame;;
 
-        if ( (cvWaitKey(10) & 255) == 's' )
-        {
+   // Show the image captured from the camera in the window and repeat
+   while ( 1 )
+   {
+      frame = NULL;
 
-           // CvSize size = cvGetSize(frame);
-           // IplImage* img= cvCreateImage(size, IPL_DEPTH_16S, 1);
-           // img = frame;
+      // grab a frame.
+      captureFrame (capture, &frame);
 
-            cvSaveImage("1.jpg", frame);
-            frame->imageData[frame->imageSize - 1] = '\0';
+      // if we are not able to grab a frame, then generate error msg and exit.
+      if (frame == NULL)
+      {
+         fprintf( stderr, "ERROR: frame is null...\n" );
 
-            importPythonModule ("1.jpg");
-         }
+         getchar();
+         break;
+      }
 
-        if ( (cvWaitKey(10) & 255) == 27 ) break;
-    }
-    // Release the capture device housekeeping
-    cvReleaseCapture( &capture );
-    cvDestroyWindow( "mywindow" );
-    return 0;
+      cvShowImage( "mywindow", frame );
+
+      // Do not release the frame!
+      if ( (cvWaitKey(10) & 255) == 's' )
+      {
+         cvSaveImage("1.jpg", frame);
+         frame->imageData[frame->imageSize - 1] = '\0';
+
+         importPythonModule ("1.jpg");
+      }
+
+      if ( (cvWaitKey(10) & 255) == 27 ) break;
+   }
+
+   // Release the capture device housekeeping
+   cvReleaseCapture( &capture );
+   cvDestroyWindow( "mywindow" );
+
+   return 0;
 }

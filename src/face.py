@@ -69,7 +69,7 @@ def get_images_from_cpp (img1_file):
 
 
     image1 = detect_faces (img1_file);
-    image2 = detect_faces ("2.jpg");
+    image2 = detect_faces ("../examples/2.jpg");
 
     faceId1 = image1[0]['faceId'];
     faceId2 = image2[0]['faceId'];

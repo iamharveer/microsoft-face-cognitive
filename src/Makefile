@@ -241,7 +241,7 @@ top_builddir = ..
 top_srcdir = ..
 PYTHONLIBS = -ldl  -lutil -lm  -lpython3.4m -Xlinker -export-dynamic
 OPENCVLIBS = -lopencv_core -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_videoio
-AM_CXXFLAGS = -g -std=c++11 -L/usr/local/lib -lpthread $(PYTHONLIBS) $(OPENCVLIBS)
+AM_CXXFLAGS = -g -std=c++11 -I../include/ -L/usr/local/lib -lpthread $(PYTHONLIBS) $(OPENCVLIBS)
 face_SOURCES = face.cpp python_cpp_interface.cpp
 all: all-am
 
@@ -553,6 +553,9 @@ uninstall-am: uninstall-binPROGRAMS
 	ps ps-am tags tags-am uninstall uninstall-am \
 	uninstall-binPROGRAMS
 
+
+clean_local :
+	rm face.o python_cpp_interface.o
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
