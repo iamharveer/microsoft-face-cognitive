@@ -1,7 +1,10 @@
-// system defined header files.
+// C++ style system defined header files.
 #include <queue>
-#include <thread>
 #include <iostream>
+
+// C style system defined header files.
+#include <pthread.h>
+#include <errno.h>
 
 // user or external lib dependent header files.
 #include "face.hpp"
@@ -14,6 +17,7 @@ using namespace std;
 
 // global variables.
 queue<IplImage> que;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 /******************************************************************************/
@@ -28,6 +32,8 @@ int captureFrame (CvCapture* const capture, IplImage** const frame)
 {
    // Get one frame
    *frame = cvQueryFrame (capture);
+   int rtn_code = 0;
+   
 
    if (*frame == NULL)
    {
@@ -51,7 +57,11 @@ int captureFrame (CvCapture* const capture, IplImage** const frame)
 /******************************************************************************/
 int main(int argc, char *argv[]) 
 {
+   struct timespec maxT_toObtainMutex = { 0 };
+   maxT_toObtainMutex.tv_nsec = 0.28000;
+
    int pushedFrameCount = 0;
+   int rtn_code = 0;
 
    // Get one frame
    IplImage* frame;
@@ -68,10 +78,16 @@ int main(int argc, char *argv[])
 
    // Create a window in which the captured images will be presented
    cvNamedWindow( "mywindow", CV_WINDOW_AUTOSIZE );
+  
+   pthread_t frameProcessorThID;
    
-   int n = 10;
-   thread processFrameThID (processFrame, n);
-
+   rtn_code = pthread_create (&frameProcessorThID, NULL, processFrame, NULL);
+   if (rtn_code != 0)
+   {
+      perror ("Error creating thread (frameProcessor): ");
+      return -2;
+   } 
+    
    // Show the image captured from the camera in the window and repeat
    while ( 1 )
    {
@@ -92,12 +108,36 @@ int main(int argc, char *argv[])
       cvShowImage( "mywindow", frame );
       
       // push frame to queue until the count < 10.
-      if (pushedFrameCount++ < MAX_FRAMES_TO_PROCESS)
+      if (pushedFrameCount < MAX_FRAMES_TO_PROCESS)
       {
-         que.push (*frame);
+         // critical section, need to protect que against
+         // simultaneous access.
+         rtn_code = pthread_mutex_timedlock (&mutex, &maxT_toObtainMutex);
+
+         if (!rtn_code)
+         {
+            que.push (*frame);
+
+            pthread_mutex_unlock (&mutex);
+            pushedFrameCount++;
+         }
+
+         else if (rtn_code == ETIMEDOUT || rtn_code == EAGAIN)
+         {
+            cout << "timeout occurred.\n";
+         }
+
+         else
+         {
+            cout << "unexpected error occurred in locking mutex, rtn_code = "
+                 << rtn_code << endl;
+         }
       }
 
       cvWaitKey(28);
+
+      // give a chance other thread to process just captured frame.
+      pthread_yield();
    }
 
    // Release the capture device housekeeping

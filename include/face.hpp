@@ -7,8 +7,9 @@
 
 // global queue that pushes frames in order for processFrame to execute.
 extern std::queue<IplImage> que;
+extern pthread_mutex_t mutex;
 
 int importPythonModule (const char *);
 int captureFrame (CvCapture* const, IplImage** const);
-int processFrame (int arg);
+void* processFrame (void *arg);
 
