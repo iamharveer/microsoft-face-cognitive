@@ -57,8 +57,8 @@ int captureFrame (CvCapture* const capture, IplImage** const frame)
 /******************************************************************************/
 int main(int argc, char *argv[]) 
 {
-   struct timespec maxT_toObtainMutex = { 0 };
-   maxT_toObtainMutex.tv_nsec = 0.28000;
+   struct timespec maxT_toObtainMutex = { .tv_sec  = 0,
+                                          .tv_nsec = 28000 };
 
    int pushedFrameCount = 0;
    int rtn_code = 0;
